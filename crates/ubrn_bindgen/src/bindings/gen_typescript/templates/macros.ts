@@ -314,11 +314,11 @@
     v{{ loop.index0 }}: {# space #}
     {{-     field|type_name(self) }}
     {%-   else %}
-    {{-     field.name()|var_name }}: {{ field|type_name(self) -}}
+    {{-     field.name()|var_name }}
     {%-     match field.default_value() %}
-    {%-       when Some with(literal) %} = {{ literal|render_literal(field, ci) }}
+    {%-       when Some with(literal) %}? 
     {%-       else %}
-    {%-     endmatch -%}
+    {%-     endmatch -%}: {{ field|type_name(self) -}}
     {%-   endif %}
     {%-   if !loop.last %}, {% endif %}
     {%- endfor %}

@@ -68,6 +68,14 @@ export const {{ decl_type_name }} = (() => {
         {%-   if !is_tuple %}
         constructor(inner: { {% call ts::field_list_decl(variant, false) %} }) {
             super("{{ type_name }}", "{{ external_name }}");
+            {%- for field in variant.fields() -%}
+                {%-     match field.default_value() %}
+                {%-       when Some with(literal) %}
+                inner["{{ field.name()|var_name }}"] = inner["{{ field.name()|var_name }}"] ?? {{ literal|render_literal(field, ci) }};
+                {%-       else %}
+                {%-     endmatch -%}
+            {%- endfor %}
+
             this.inner = Object.freeze(inner);
         }
 
