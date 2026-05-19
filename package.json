@@ -20,8 +20,11 @@
   },
   "scripts": {
     "build": "tsc",
-    "prepare": "yarn build",
+    "prepare": "npm run build",
     "test": "cargo test"
+  },
+  "dependencies": {
+    "typescript": "^5.8.3"
   },
   "devDependencies": {
     "abortcontroller-polyfill": "^1.7.5",
