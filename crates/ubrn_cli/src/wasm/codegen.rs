@@ -5,7 +5,7 @@
  */
 use std::rc::Rc;
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use camino::{Utf8Path, Utf8PathBuf};
 
 use ubrn_bindgen::{generate_entrypoint, AbiFlavor, SwitchArgs};
@@ -32,14 +32,29 @@ impl RenderedFile for WasmCargoToml {
                 use toml::to_string;
                 let path = project_root.join(patch_file);
                 let patch: toml::Value = ubrn_common::read_from_file(&path)?;
-                let rendered: toml::Value = toml::from_str(&contents)?;
-                let merged: toml::Value = serde_toml_merge::merge(rendered, patch)
-                    .map_err(|e| anyhow!("TOML merge error: {e}"))?;
+                let mut merged: toml::Value = toml::from_str(&contents)?;
+                merge_toml(&mut merged, patch);
                 to_string(&merged)?
             } else {
                 contents
             },
         )
+    }
+}
+
+fn merge_toml(into: &mut toml::Value, from: toml::Value) {
+    match (into, from) {
+        (toml::Value::Table(into_t), toml::Value::Table(from_t)) => {
+            for (k, v) in from_t {
+                match into_t.get_mut(&k) {
+                    Some(existing) => merge_toml(existing, v),
+                    None => {
+                        into_t.insert(k, v);
+                    }
+                }
+            }
+        }
+        (slot, other) => *slot = other,
     }
 }
 impl WasmCargoToml {
